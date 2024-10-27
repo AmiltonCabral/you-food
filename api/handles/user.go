@@ -1,22 +1,22 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"golang.org/x/exp/rand"
 )
 
 type User struct {
-	id         string
-	name       string
-	password   string
-	order_code int
-	address    string
+	Id         string
+	Name       string
+	Password   string
+	Order_code int
+	Address    string
 }
 
 func (h Handler) UserHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,56 +35,62 @@ func (h Handler) UserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	// Read to request body
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 
 	if err != nil {
-		log.Fatalln(err)
-		w.WriteHeader(500)
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	var user User
-	json.Unmarshal(body, &user)
 
-	// user.id = (uuid.New()).String()
+	var user User
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		log.Println("failed to unmarshal:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	rand.Seed(uint64(time.Now().UnixNano()))
-	user.order_code = rand.Intn(9000) + 1000
+	user.Order_code = rand.Intn(9000) + 1000
 
-	queryStmt := `INSERT INTO users (id,name,password,order_code,address) VALUES ($1, $2, $3, $4, $5) RETURNING id;`
-	err = h.DB.QueryRow(queryStmt, &user.id, &user.name, &user.password, &user.order_code, &user.address).Scan(&user.id)
+	queryStmt := `INSERT INTO users (id, name, password, order_code, address)
+                  VALUES ($1, $2, $3, $4, $5) RETURNING id;`
+	err = h.DB.QueryRow(queryStmt,
+		user.Id,
+		user.Name,
+		user.Password,
+		user.Order_code,
+		user.Address).Scan(&user.Id)
+
 	if err != nil {
-		log.Println("failed to execute query", err)
-		w.WriteHeader(500)
+		log.Println("failed to execute query:", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode("Created")
+	json.NewEncoder(w).Encode(user)
 }
 
 func (h Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	id := r.URL.Query().Get("id")
 
-	queryStmt := `SELECT * FROM users WHERE id = $1 ;`
-	results, err := h.DB.Query(queryStmt, id)
-	if err != nil {
-		log.Println("failed to execute query", err)
-		w.WriteHeader(500)
-		return
-	}
+	queryStmt := `SELECT id, name, password, order_code, address FROM users WHERE id = $1;`
+	row := h.DB.QueryRow(queryStmt, id)
 
 	var user User
-	for results.Next() {
-		err = results.Scan(&user.id, &user.name, &user.password, &user.order_code, &user.address)
-		if err != nil {
-			log.Println("failed to scan", err)
-			w.WriteHeader(500)
+	err := row.Scan(&user.Id, &user.Name, &user.Password, &user.Order_code, &user.Address)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+		log.Println("failed to scan", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
