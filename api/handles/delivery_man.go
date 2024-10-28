@@ -8,27 +8,24 @@ import (
 	"net/http"
 )
 
-type Product struct {
-    Id          int
-    Store_id    string
-    Name        string
-    Description string
-    Price       float64
-    Amount      int
+type DeliveryMan struct {
+    Id       string
+    Name     string
+    Password string
 }
 
-func (h Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
+func (h Handler) DeliveryManHandler(w http.ResponseWriter, r *http.Request) {
     switch r.Method {
     case http.MethodPost:
-        h.CreateProduct(w, r)
+        h.CreateDeliveryMan(w, r)
     case http.MethodGet:
-        h.GetProduct(w, r)
+        h.GetDeliveryMan(w, r)
     default:
         w.WriteHeader(http.StatusMethodNotAllowed)
     }
 }
 
-func (h Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
+func (h Handler) CreateDeliveryMan(w http.ResponseWriter, r *http.Request) {
     defer r.Body.Close()
 
     body, err := io.ReadAll(r.Body)
@@ -38,23 +35,21 @@ func (h Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var product Product
-    err = json.Unmarshal(body, &product)
+    var deliveryMan DeliveryMan
+    err = json.Unmarshal(body, &deliveryMan)
     if err != nil {
         log.Println("failed to unmarshal:", err)
         w.WriteHeader(http.StatusBadRequest)
         return
     }
 
-    queryStmt := `INSERT INTO products (store_id, name, description, price, ammount)
-                  VALUES ($1, $2, $3, $4, $5) RETURNING id;`
+    queryStmt := `INSERT INTO delivery_man (id, name, password)
+                  VALUES ($1, $2, $3) RETURNING id;`
 
     err = h.DB.QueryRow(queryStmt,
-        product.Store_id,
-        product.Name,
-        product.Description,
-        product.Price,
-        product.Amount).Scan(&product.Id)
+        deliveryMan.Id,
+        deliveryMan.Name,
+        deliveryMan.Password).Scan(&deliveryMan.Id)
     if err != nil {
         log.Println("failed to execute query:", err)
         w.WriteHeader(http.StatusInternalServerError)
@@ -63,19 +58,17 @@ func (h Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Add("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(product)
+    json.NewEncoder(w).Encode(deliveryMan)
 }
 
-func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
+func (h Handler) GetDeliveryMan(w http.ResponseWriter, r *http.Request) {
     id := r.URL.Query().Get("id")
 
-    queryStmt := `SELECT id, store_id, name, description, price, ammount
-                  FROM products WHERE id = $1;`
+    queryStmt := `SELECT id, name, password FROM delivery_man WHERE id = $1;`
     row := h.DB.QueryRow(queryStmt, id)
 
-    var product Product
-    err := row.Scan(&product.Id, &product.Store_id, &product.Name,
-                    &product.Description, &product.Price, &product.Amount)
+    var deliveryMan DeliveryMan
+    err := row.Scan(&deliveryMan.Id, &deliveryMan.Name, &deliveryMan.Password)
     if err != nil {
         if err == sql.ErrNoRows {
             w.WriteHeader(http.StatusNotFound)
@@ -88,5 +81,5 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Add("Content-Type", "application/json")
     w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(product)
+    json.NewEncoder(w).Encode(deliveryMan)
 }
