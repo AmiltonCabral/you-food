@@ -25,10 +25,6 @@ func (h Handler) UserHandler(w http.ResponseWriter, r *http.Request) {
 		h.CreateUser(w, r)
 	case http.MethodGet:
 		h.GetUser(w, r)
-	case http.MethodPut:
-		h.UpdateUser(w, r)
-	case http.MethodDelete:
-		h.DeleteUser(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -36,8 +32,8 @@ func (h Handler) UserHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
-	body, err := io.ReadAll(r.Body)
 
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -54,16 +50,15 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	rand.Seed(uint64(time.Now().UnixNano()))
 	user.Order_code = rand.Intn(9000) + 1000
-
 	queryStmt := `INSERT INTO users (id, name, password, order_code, address)
                   VALUES ($1, $2, $3, $4, $5) RETURNING id;`
+
 	err = h.DB.QueryRow(queryStmt,
 		user.Id,
 		user.Name,
 		user.Password,
 		user.Order_code,
 		user.Address).Scan(&user.Id)
-
 	if err != nil {
 		log.Println("failed to execute query:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -97,7 +92,3 @@ func (h Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
 }
-
-func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {}
-
-func (h Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {}
