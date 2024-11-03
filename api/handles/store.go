@@ -6,14 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-)
 
-type Store struct {
-	Id       string
-	Name     string
-	Password string
-	Address  string
-}
+	controlers "github.com/amiltoncabral/youFood/controllers"
+)
 
 func (h Handler) StoreHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -36,7 +31,7 @@ func (h Handler) CreateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var store Store
+	var store controlers.Store
 	err = json.Unmarshal(body, &store)
 	if err != nil {
 		log.Println("failed to unmarshal:", err)
@@ -44,10 +39,7 @@ func (h Handler) CreateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	queryStmt := `INSERT INTO stores (id, name, password, address)
-	              VALUES ($1, $2, $3, $4);`
-
-	err = h.DB.QueryRow(queryStmt, store.Id, store.Name, store.Password, store.Address).Scan(&store.Id)
+	store, err = h.c.CreateStore(store)
 	if err != nil {
 		log.Println("failed to execute query:", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,11 +52,8 @@ func (h Handler) CreateStore(w http.ResponseWriter, r *http.Request) {
 func (h Handler) GetStore(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
-	queryStmt := `SELECT id, name, password, address FROM stores WHERE id = $1;`
-	row := h.DB.QueryRow(queryStmt, id)
+	store, err := h.c.GetStore(id)
 
-	var store Store
-	err := row.Scan(&store.Id, &store.Name, &store.Password, &store.Address)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)

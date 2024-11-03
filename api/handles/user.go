@@ -6,18 +6,9 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"time"
 
-	"golang.org/x/exp/rand"
+	controlers "github.com/amiltoncabral/youFood/controllers"
 )
-
-type User struct {
-	Id         string
-	Name       string
-	Password   string
-	Order_code int
-	Address    string
-}
 
 func (h Handler) UserHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -40,7 +31,7 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var user User
+	var user controlers.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		log.Println("failed to unmarshal:", err)
@@ -48,21 +39,9 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rand.Seed(uint64(time.Now().UnixNano()))
-	user.Order_code = rand.Intn(9000) + 1000
-	queryStmt := `INSERT INTO users (id, name, password, order_code, address)
-                  VALUES ($1, $2, $3, $4, $5) RETURNING id;`
-
-	err = h.DB.QueryRow(queryStmt,
-		user.Id,
-		user.Name,
-		user.Password,
-		user.Order_code,
-		user.Address).Scan(&user.Id)
+	user, err = h.c.CreateUser(user)
 	if err != nil {
-		log.Println("failed to execute query:", err)
 		w.WriteHeader(http.StatusInternalServerError)
-		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -73,11 +52,8 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (h Handler) GetUser(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
-	queryStmt := `SELECT id, name, password, order_code, address FROM users WHERE id = $1;`
-	row := h.DB.QueryRow(queryStmt, id)
+	user, err := h.c.GetUser(id)
 
-	var user User
-	err := row.Scan(&user.Id, &user.Name, &user.Password, &user.Order_code, &user.Address)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)

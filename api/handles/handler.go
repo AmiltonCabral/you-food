@@ -1,11 +1,11 @@
 package handlers
 
-import "database/sql"
+import controller "github.com/amiltoncabral/youFood/controllers"
 
 type Handler struct {
-	DB *sql.DB
+	c *controller.Controller
 }
 
-func New(db *sql.DB) Handler {
-	return Handler{db}
+func New(c controller.Controller) Handler {
+	return Handler{}
 }

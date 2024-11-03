@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	controllers "github.com/amiltoncabral/youFood/controllers"
 	handlers "github.com/amiltoncabral/youFood/handles"
 )
 
 func HandleRequest(db *sql.DB) {
-	h := handlers.New(db)
+	c := controllers.New(db)
+	h := handlers.New(c)
 	http.HandleFunc("/user", h.UserHandler)
 	http.HandleFunc("/product", h.ProductHandler)
 	http.HandleFunc("/delivery-man", h.DeliveryManHandler)
