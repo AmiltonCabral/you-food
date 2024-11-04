@@ -114,16 +114,19 @@ func (h Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if err.Error() == "invalid store id" {
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": "store not found"})
 			return
 		}
 		if err.Error() == "invalid store password" {
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusUnauthorized)
 			json.NewEncoder(w).Encode(map[string]string{"error": "invalid store password"})
 			return
 		}
 		if err == sql.ErrNoRows {
+			w.Header().Add("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": "product not found"})
 			return
@@ -141,6 +144,7 @@ func (h Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 func (h Handler) SearchProducts(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
+		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(map[string]string{"error": "search query is required"})
 		return

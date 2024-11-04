@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"log"
+	"strconv"
 )
 
 type Order struct {
@@ -22,6 +23,12 @@ func (c Controller) CreateOrder(order Order, userPass string) (Order, error) {
 	if user.Password != userPass {
 		return Order{}, fmt.Errorf("invalid user password")
 	}
+	product, err := c.GetProduct(strconv.Itoa(order.Product_id))
+	if err != nil {
+		return Order{}, fmt.Errorf("invalid product id")
+	}
+	order.Status = "pending"
+	order.Total_price = product.Price * float64(order.Quantity)
 
 	queryStmt := `INSERT INTO orders (user_id, product_id, quantity, total_price, status)
                      VALUES ($1, $2, $3, $4, $5) RETURNING id;`

@@ -45,8 +45,24 @@ func (h Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	order, err := h.c.CreateOrder(newOrderReq.Order, newOrderReq.User_password)
-
 	if err != nil {
+		if err.Error() == "invalid user id" {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "user not found"})
+			return
+		}
+		if err.Error() == "invalid product id" {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "product not found"})
+			return
+		}
+		if err.Error() == "invalid user password" {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		log.Println("failed to create order:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
