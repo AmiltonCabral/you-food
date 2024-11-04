@@ -19,7 +19,7 @@ func (c Controller) CreateUser(user User) (User, error) {
 	rand.Seed(uint64(time.Now().UnixNano()))
 	user.Order_code = rand.Intn(9000) + 1000
 	queryStmt := `INSERT INTO users (id, name, password, order_code, address)
-                     VALUES ($1, $2, $3, $4, $5) RETURNING id;`
+                     VALUES ($1, $2, $3, $4, $5);`
 
 	_, err := c.db.Exec(queryStmt,
 		user.Id,

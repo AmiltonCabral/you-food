@@ -12,12 +12,12 @@ type DeliveryMan struct {
 
 func (c Controller) CreateDeliveryMan(deliveryMan DeliveryMan) (DeliveryMan, error) {
 	queryStmt := `INSERT INTO delivery_man (id, name, password)
-                     VALUES ($1, $2, $3) RETURNING id;`
+                     VALUES ($1, $2, $3);`
 
-	err := c.db.QueryRow(queryStmt,
+	_, err := c.db.Exec(queryStmt,
 		deliveryMan.Id,
 		deliveryMan.Name,
-		deliveryMan.Password).Scan(&deliveryMan.Id)
+		deliveryMan.Password)
 	if err != nil {
 		log.Println("failed to execute query:", err)
 		return DeliveryMan{}, err
