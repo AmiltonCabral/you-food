@@ -39,9 +39,15 @@ func (h Handler) CreateDeliveryMan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deliveryMan, err = h.c.CreateDeliveryMan(deliveryMan)
+	_, err = h.c.GetDeliveryMan(deliveryMan.Id)
+	if err != sql.ErrNoRows {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
 
+	deliveryMan, err = h.c.CreateDeliveryMan(deliveryMan)
 	if err != nil {
+		log.Println("failed to execute query:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
