@@ -1,0 +1,354 @@
+{
+	"info": {
+		"_postman_id": "5ff68a7e-9863-4231-b469-879e52d8517f",
+		"name": "YouFood API",
+		"description": "API para delivery de comida",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23394555"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"user131\",\n    \"name\": \"John Doe\",\n    \"password\": \"secretpass\",\n    \"address\": \"123 Main St\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/user?id=user131",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "user131"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Stores",
+			"item": [
+				{
+					"name": "Create Store",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"store130\",\n    \"name\": \"Pizza Place\",\n    \"password\": \"storepass\",\n    \"address\": \"456 Food St\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"store"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Store",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/store?id=store130",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"store"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "store130"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": {\n        \"store_id\": \"store123\",\n        \"name\": \"Cachorro quente\",\n        \"description\": \"O hot-dog\",\n        \"price\": 29.90,\n        \"amount\": 10\n    },\n    \"store_password\": \"storepass\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/product?id=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"product"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/product?q=cachorro",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"product"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "cachorro"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product\": {\n        \"id\": 1,\n        \"store_id\": \"store123\",\n        \"name\": \"Pizza Margherita Updated\",\n        \"description\": \"Updated Classic Italian Pizza\",\n        \"price\": 34.99,\n        \"amount\": \"15\"\n    },\n    \"store_password\": \"storepass\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/product",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order\": {\n        \"user_id\": \"user123\",\n        \"product_id\": 1,\n        \"quantity\": 2\n    },\n    \"user_password\": \"secretpass\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/order",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/order?id=2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"order"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Delivery Men",
+			"item": [
+				{
+					"name": "Create Delivery Man",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"delivery125\",\n    \"name\": \"Mike Delivery\",\n    \"password\": \"deliverypass\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8000/delivery-man",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"delivery-man"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Delivery Man",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/delivery-man?id=delivery124",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"delivery-man"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "delivery124"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
