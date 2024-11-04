@@ -16,5 +16,6 @@ func HandleRequest(db *sql.DB) {
 	http.HandleFunc("/product", h.ProductHandler)
 	http.HandleFunc("/delivery-man", h.DeliveryManHandler)
 	http.HandleFunc("/order", h.OrderHandler)
+	http.HandleFunc("/store", h.StoreHandler)
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }

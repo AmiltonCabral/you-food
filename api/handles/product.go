@@ -20,6 +20,10 @@ func (h Handler) ProductHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		h.CreateProduct(w, r)
 	case http.MethodGet:
+		if r.URL.Query().Get("q") != "" {
+			h.SearchProducts(w, r)
+			return
+		}
 		h.GetProduct(w, r)
 	case http.MethodPut:
 		h.UpdateProduct(w, r)
@@ -117,4 +121,24 @@ func (h Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(product)
+}
+
+func (h Handler) SearchProducts(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "search query is required"})
+		return
+	}
+
+	products, err := h.c.SearchProducts(query)
+	if err != nil {
+		log.Printf("failed to search products: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(products)
 }

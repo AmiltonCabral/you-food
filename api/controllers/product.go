@@ -49,7 +49,6 @@ func (c Controller) GetProduct(productId string) (Product, error) {
 	return product, err
 }
 
-// UPDATE DA LOJA E UPDATE DE COMPRA DO USUARIO
 func (c Controller) updateProduct(product Product) (Product, error) {
 	// Primeiro verifica se o produto existe
 	var existingProduct Product
@@ -128,4 +127,43 @@ func (c Controller) BuyProduct(productId string, amount int) (Product, error) {
 	}
 
 	return product, nil
+}
+
+func (c Controller) SearchProducts(query string) ([]Product, error) {
+	queryStmt := `
+        SELECT id, store_id, name, description, price, ammount
+        FROM products
+        WHERE name ILIKE $1 OR description ILIKE $1;
+    `
+	// O ILIKE faz uma busca case-insensitive e o % permite match parcial
+	searchPattern := "%" + query + "%"
+
+	rows, err := c.db.Query(queryStmt, searchPattern)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []Product
+	for rows.Next() {
+		var product Product
+		err := rows.Scan(
+			&product.Id,
+			&product.Store_id,
+			&product.Name,
+			&product.Description,
+			&product.Price,
+			&product.Amount,
+		)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, product)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return products, nil
 }
