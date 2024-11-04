@@ -39,6 +39,12 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err = h.c.GetUser(user.Id)
+	if err != sql.ErrNoRows {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
 	user, err = h.c.CreateUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
