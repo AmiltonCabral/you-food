@@ -50,11 +50,24 @@ func (h Handler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.c.CreateProduct(newProdReq.Product, newProdReq.Store_password)
+	product, err := h.c.CreateProduct(newProdReq.Product, newProdReq.Store_password)
+	if err == sql.ErrNoRows {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+	if err != nil && err.Error() == "invalid password" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	if err != nil {
+		log.Println("failed to create product:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newProdReq)
+	json.NewEncoder(w).Encode(product)
 }
 
 func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
@@ -78,13 +91,6 @@ func (h Handler) GetProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"error": "id is required"})
-		return
-	}
-
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -103,11 +109,20 @@ func (h Handler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.c.UpdateProduct(
 		newProdReq.Product,
-		newProdReq.Product.Store_id,
 		newProdReq.Store_password,
 	)
 
 	if err != nil {
+		if err.Error() == "invalid store id" {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "store not found"})
+			return
+		}
+		if err.Error() == "invalid store password" {
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{"error": "invalid store password"})
+			return
+		}
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
 			json.NewEncoder(w).Encode(map[string]string{"error": "product not found"})

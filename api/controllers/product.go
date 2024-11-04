@@ -16,8 +16,11 @@ type Product struct {
 
 func (c Controller) CreateProduct(product Product, password string) (Product, error) {
 	store, err := c.GetStore(product.Store_id)
+	if err != nil {
+		return Product{}, err
+	}
 	if store.Password != password {
-		return Product{}, fmt.Errorf("invalid store password")
+		return Product{}, fmt.Errorf("invalid password")
 	}
 
 	queryStmt := `INSERT INTO products (store_id, name, description, price, ammount)
@@ -88,13 +91,20 @@ func (c Controller) updateProduct(product Product) (Product, error) {
 	return product, err
 }
 
-func (c Controller) UpdateProduct(product Product, storeId string, storePassword string) (Product, error) {
-	store, err := c.GetStore(storeId)
+func (c Controller) UpdateProduct(product Product, storePassword string) (Product, error) {
+	store, err := c.GetStore(product.Store_id)
 	if err != nil {
 		return Product{}, fmt.Errorf("invalid store id")
 	}
 	if store.Password != storePassword {
 		return Product{}, fmt.Errorf("invalid store password")
+	}
+
+	var existingProduct Product
+	checkStmt := `SELECT id FROM products WHERE id = $1;`
+	err = c.db.QueryRow(checkStmt, product.Id).Scan(&existingProduct.Id)
+	if err != nil {
+		return Product{}, err
 	}
 
 	product, err = c.updateProduct(product)
