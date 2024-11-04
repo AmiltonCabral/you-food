@@ -21,12 +21,12 @@ func (c Controller) CreateUser(user User) (User, error) {
 	queryStmt := `INSERT INTO users (id, name, password, order_code, address)
                      VALUES ($1, $2, $3, $4, $5) RETURNING id;`
 
-	err := c.db.QueryRow(queryStmt,
+	_, err := c.db.Exec(queryStmt,
 		user.Id,
 		user.Name,
 		user.Password,
 		user.Order_code,
-		user.Address).Scan(&user.Id)
+		user.Address)
 	if err != nil {
 		log.Println("failed to execute query:", err)
 		return User{}, err

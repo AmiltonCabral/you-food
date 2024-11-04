@@ -11,7 +11,11 @@ func (c Controller) CreateStore(store Store) (Store, error) {
 	queryStmt := `INSERT INTO stores (id, name, password, address)
 	              VALUES ($1, $2, $3, $4);`
 
-	err := c.db.QueryRow(queryStmt, store.Id, store.Name, store.Password, store.Address).Scan(&store.Id)
+	_, err := c.db.Exec(queryStmt,
+		store.Id,
+		store.Name,
+		store.Password,
+		store.Address)
 
 	if err != nil {
 		return Store{}, err

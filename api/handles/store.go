@@ -39,6 +39,12 @@ func (h Handler) CreateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err = h.c.GetStore(store.Id)
+	if err != sql.ErrNoRows {
+		w.WriteHeader(http.StatusConflict)
+		return
+	}
+
 	store, err = h.c.CreateStore(store)
 	if err != nil {
 		log.Println("failed to execute query:", err)
@@ -46,7 +52,9 @@ func (h Handler) CreateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(store)
 }
 
 func (h Handler) GetStore(w http.ResponseWriter, r *http.Request) {

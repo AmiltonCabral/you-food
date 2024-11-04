@@ -47,7 +47,9 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err = h.c.CreateUser(user)
 	if err != nil {
+		log.Println("failed to execute query:", err)
 		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
