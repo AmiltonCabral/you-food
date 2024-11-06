@@ -1,7 +1,8 @@
 services:
   migrate:
     image: migrate/migrate
-    command: ["-path", "/migrations", "-database", "${DATABASE_URI}", "up"]
+    command:
+      ["-path", "/migrations", "-database", "${POSTGRESQL_ADDON_URI}", "up"]
     volumes:
       - ./migrations:/migrations
 
@@ -10,7 +11,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URI=${DATABASE_URI}
+      - DB_HOST=${POSTGRESQL_ADDON_HOST}
+      - DB_PORT=${POSTGRESQL_ADDON_PORT}
+      - DB_NAME=${POSTGRESQL_ADDON_DB}
+      - DB_USER=${POSTGRESQL_ADDON_USER}
+      - DB_PASSWORD=${POSTGRESQL_ADDON_PASSWORD}
     depends_on:
       migrate:
         condition: service_completed_successfully
