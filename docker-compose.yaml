@@ -1,14 +1,7 @@
 services:
   migrate:
     image: migrate/migrate
-    command:
-      [
-        "-path",
-        "/migrations",
-        "-database",
-        "postgresql://urccm0eys3su8cm7fttp:3Nl8zNSPemqEwD4Bhu4Nb4xyfH4JTB@blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com:50013/blfguy9v4iiyvznd0ogl",
-        "up",
-      ]
+    command: ["-path", "/migrations", "-database", "${DATABASE_URI}", "up"]
     volumes:
       - ./migrations:/migrations
 
@@ -17,11 +10,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DB_HOST=blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com
-      - DB_PORT=50013
-      - DB_USER=urccm0eys3su8cm7fttp
-      - DB_PASSWORD=3Nl8zNSPemqEwD4Bhu4Nb4xyfH4JTB
-      - DB_NAME=blfguy9v4iiyvznd0ogl
+      - DATABASE_URI=${DATABASE_URI}
     depends_on:
       migrate:
         condition: service_completed_successfully

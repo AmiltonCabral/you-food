@@ -32,7 +32,7 @@ spec:
             - name: DB_USER
               value: urccm0eys3su8cm7fttp
             - name: DB_PASSWORD
-              value: 3Nl8zNSPemqEwD4Bhu4Nb4xyfH4JTB
+              value: <DATABASE_PASSWORD_HERE>
             - name: DB_NAME
               value: blfguy9v4iiyvznd0ogl
 ---

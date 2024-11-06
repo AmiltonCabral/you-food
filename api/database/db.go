@@ -10,34 +10,38 @@ import (
 )
 
 func OpenConn() *sql.DB {
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		host = "localhost"
-	}
+	connInfo := os.Getenv("DATABASE_URI")
 
-	port := os.Getenv("DB_PORT")
-	if port == "" {
-		port = "5432"
-	}
+	if connInfo == "" {
+		host := os.Getenv("DB_HOST")
+		if host == "" {
+			host = "localhost"
+		}
 
-	user := os.Getenv("DB_USER")
-	if user == "" {
-		user = "postgres"
-	}
+		port := os.Getenv("DB_PORT")
+		if port == "" {
+			port = "5432"
+		}
 
-	password := os.Getenv("DB_PASSWORD")
-	if password == "" {
-		password = "password"
-	}
+		user := os.Getenv("DB_USER")
+		if user == "" {
+			user = "postgres"
+		}
 
-	dbname := os.Getenv("DB_NAME")
-	if dbname == "" {
-		dbname = "youfood"
-	}
+		password := os.Getenv("DB_PASSWORD")
+		if password == "" {
+			password = "password"
+		}
 
-	connInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		dbname := os.Getenv("DB_NAME")
+		if dbname == "" {
+			dbname = "youfood"
+		}
+
+		connInfo = fmt.Sprintf("host=%s port=%s user=%s "+
+			"password=%s dbname=%s sslmode=disable",
+			host, port, user, password, dbname)
+	}
 
 	db, err := sql.Open("postgres", connInfo)
 	if err != nil {
