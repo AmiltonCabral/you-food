@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: youfood-api
-          image: docker.io/amiltoncabral/youfood-api:1.0
+          image: docker.io/amiltoncabral/youfood-api:1.1
           resources:
             requests:
               cpu: "100m"
