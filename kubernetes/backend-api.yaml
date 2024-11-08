@@ -26,25 +26,52 @@ spec:
             - containerPort: 8000
           env:
             - name: DB_HOST
-              value: blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: db_host
             - name: DB_PORT
-              value: "50013"
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: db_port
             - name: DB_USER
-              value: urccm0eys3su8cm7fttp
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: db_user
             - name: DB_PASSWORD
-              value: <DATABASE_PASSWORD_HERE>
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: db_password
             - name: DB_NAME
-              value: blfguy9v4iiyvznd0ogl
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db
+                  key: db_name
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: youfood-api
 spec:
+  type: LoadBalancer
   selector:
     app: youfood-api
   ports:
     - name: http
       port: 8000
       targetPort: 8000
-  type: LoadBalancer
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-db
+type: Opaque
+stringData:
+  db_host: blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com
+  db_port: "50013"
+  db_user: urccm0eys3su8cm7fttp
+  db_password:
+  db_name: blfguy9v4iiyvznd0ogl
