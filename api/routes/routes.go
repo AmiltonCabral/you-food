@@ -5,12 +5,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/redis/go-redis/v9"
+
 	controllers "github.com/amiltoncabral/youFood/controllers"
 	handlers "github.com/amiltoncabral/youFood/handles"
 )
 
-func HandleRequest(db *sql.DB) {
-	c := controllers.New(db)
+func HandleRequest(db *sql.DB, rd *redis.Client) {
+	c := controllers.New(db, rd)
 	h := handlers.New(c)
 	http.HandleFunc("/user", h.UserHandler)
 	http.HandleFunc("/product", h.ProductHandler)

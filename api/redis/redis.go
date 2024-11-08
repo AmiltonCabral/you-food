@@ -34,6 +34,9 @@ func OpenConn() *redis.Client {
 		}
 	}
 
+	fmt.Printf("Connecting to Redis at %s with db=%d protocol=%d\n",
+		os.Getenv("REDIS_ADDR"), dbNum, protocolNum)
+
 	client := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_ADDR"),
 		Password: password,
@@ -47,7 +50,7 @@ func OpenConn() *redis.Client {
 		log.Fatalf("Failed to connect redis: %v", err)
 	}
 
-	fmt.Printf("Successfully connected to redis: %s\n", pong)
+	fmt.Printf("Successfully connected to redis! %s\n", pong)
 
 	return client
 }

@@ -8,8 +8,8 @@ import (
 
 func main() {
 	db := database.OpenConn()
-	rc := redis.OpenConn()
-	routes.HandleRequest(db)
+	rd := redis.OpenConn()
+	routes.HandleRequest(db, rd)
 	database.CloseConn(db)
-	redis.CloseConn(rc)
+	redis.CloseConn(rd)
 }

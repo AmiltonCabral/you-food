@@ -23,3 +23,10 @@ database environment variables, and up the docker-compose passing this file.
 `docker-compose --env-file .env up --build`
 
 To run with Kubernetes, you need to define it on `kubernetes/backend-api.yaml`.
+
+## How to run the backend API with go run
+
+```sh
+cd api
+export $(grep -v '^#' ../.env | xargs) && go run .
+```

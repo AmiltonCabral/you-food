@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: youfood-api
-          image: docker.io/amiltoncabral/youfood-api:1.1
+          image: docker.io/amiltoncabral/youfood-api:1.2
           resources:
             requests:
               cpu: "100m"
@@ -25,16 +25,16 @@ spec:
           ports:
             - containerPort: 8000
           env:
+            - name: CACHE_REFLESH_SEC
+              value: "5"
+            - name: REDIS_ADDR
+              value: "redis:6379"
             - name: DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: backend-db
-                  key: db_host
+              value: blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com
             - name: DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: backend-db
-                  key: db_port
+              value: "50013"
+            - name: DB_NAME
+              value: blfguy9v4iiyvznd0ogl
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
@@ -45,11 +45,6 @@ spec:
                 secretKeyRef:
                   name: backend-db
                   key: db_password
-            - name: DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-db
-                  key: db_name
 ---
 apiVersion: v1
 kind: Service
@@ -70,8 +65,5 @@ metadata:
   name: backend-db
 type: Opaque
 stringData:
-  db_host: blfguy9v4iiyvznd0ogl-postgresql.services.clever-cloud.com
-  db_port: "50013"
   db_user: urccm0eys3su8cm7fttp
-  db_password:
-  db_name: blfguy9v4iiyvznd0ogl
+  db_password: d3tlLmiRwtPUY1fckwCE

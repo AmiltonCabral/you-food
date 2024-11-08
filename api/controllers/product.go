@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 )
 
 type Product struct {
@@ -140,12 +142,19 @@ func (c Controller) BuyProduct(productId string, amount int) (Product, error) {
 }
 
 func (c Controller) SearchProducts(query string) ([]Product, error) {
+	if val, err := c.rd.Get(c.ctx, query).Result(); err == nil {
+		var products []Product
+		if err := json.Unmarshal([]byte(val), &products); err == nil {
+			return products, nil
+		}
+	}
+
 	queryStmt := `
         SELECT id, store_id, name, description, price, ammount
         FROM products
         WHERE name ILIKE $1 OR description ILIKE $1;
     `
-	// O ILIKE faz uma busca case-insensitive e o % permite match parcial
+	// ILIKE performs a case-insensitive search and % allows for partial matches
 	searchPattern := "%" + query + "%"
 
 	rows, err := c.db.Query(queryStmt, searchPattern)
@@ -174,6 +183,17 @@ func (c Controller) SearchProducts(query string) ([]Product, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+
+	go func() {
+		productsJSON, err := json.Marshal(products)
+		if err != nil {
+			fmt.Printf("failed to marshal products to store on cache: %v\n", err)
+			return
+		}
+		if err = c.rd.Set(c.ctx, query, productsJSON, time.Duration(c.cacheRefleshSec)*time.Second).Err(); err != nil {
+			fmt.Printf("failed to set cache: %v\n", err)
+		}
+	}()
 
 	return products, nil
 }
