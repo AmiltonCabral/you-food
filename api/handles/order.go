@@ -1,11 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 
 	controlers "github.com/amiltoncabral/youFood/controllers"
 )
@@ -67,6 +71,8 @@ func (h Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.sendMessage()
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(order)
@@ -90,4 +96,40 @@ func (h Handler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(order)
+}
+
+func (h Handler) sendMessage() {
+	ch, err := h.c.Rmq_conn.Channel()
+	if err != nil {
+		log.Println("failed to open a channel:", err)
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		"orders", // name
+		false,    // durable
+		false,    // delete when unused
+		false,    // exclusive
+		false,    // no-wait
+		nil,      // arguments
+	)
+	if err != nil {
+		log.Println("failed to declare a queue:", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	body := []byte("Hello World!")
+	err = ch.PublishWithContext(ctx,
+		"",     // exchange
+		q.Name, // routing key
+		false,  // mandatory
+		false,  // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        body,
+		})
+	if err != nil {
+		log.Println("failed to publish a message:", err)
+	}
 }

@@ -30,3 +30,7 @@ To run with Kubernetes, you need to define it on `kubernetes/backend-api.yaml`.
 cd api
 export $(grep -v '^#' ../.env | xargs) && go run .
 ```
+
+## Monitoring Kubernetes with Prometheus
+
+[link](https://hackmd.io/@OrALpDtKSY6QetSsHgj-IA/BJXuuNmYP)

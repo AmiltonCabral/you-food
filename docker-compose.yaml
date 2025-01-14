@@ -1,21 +1,48 @@
 services:
-  migrate:
-    image: migrate/migrate
-    command:
-      ["-path", "/migrations", "-database", "${POSTGRESQL_ADDON_URI}", "up"]
-    volumes:
-      - ./migrations:/migrations
+  redis:
+    image: redis
+    command: redis-server
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      start_period: 1m
+      start_interval: 5s
+      interval: 30s
+      timeout: 30s
+      retries: 3
 
   api:
     build: ./api
     ports:
       - "8000:8000"
     environment:
+      - CACHE_REFLESH_SEC=${CACHE_REFLESH_SEC}
+      - REDIS_ADDR=${REDIS_ADDR}
       - DB_HOST=${POSTGRESQL_ADDON_HOST}
       - DB_PORT=${POSTGRESQL_ADDON_PORT}
       - DB_NAME=${POSTGRESQL_ADDON_DB}
       - DB_USER=${POSTGRESQL_ADDON_USER}
       - DB_PASSWORD=${POSTGRESQL_ADDON_PASSWORD}
+      - RMQ_URL=${RMQ_URL}
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+      # migrate:
+      #   condition: service_completed_successfully
+
+  # migrate:
+  #   image: migrate/migrate
+  #   command:
+  #     ["-path", "/migrations", "-database", "${POSTGRESQL_ADDON_URI}", "up"]
+  #   volumes:
+  #     - ./migrations:/migrations
