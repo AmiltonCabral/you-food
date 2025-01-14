@@ -71,7 +71,7 @@ func (h Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.sendMessage()
+	h.sendOrderMessage(order)
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -98,7 +98,7 @@ func (h Handler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(order)
 }
 
-func (h Handler) sendMessage() {
+func (h Handler) sendOrderMessage(order controlers.Order) {
 	ch, err := h.c.Rmq_conn.Channel()
 	if err != nil {
 		log.Println("failed to open a channel:", err)
@@ -116,10 +116,15 @@ func (h Handler) sendMessage() {
 	if err != nil {
 		log.Println("failed to declare a queue:", err)
 	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	body := []byte("Hello World!")
+	body, err := json.Marshal(order)
+	if err != nil {
+		log.Println("failed to marshal order:", err)
+		return
+	}
 	err = ch.PublishWithContext(ctx,
 		"",     // exchange
 		q.Name, // routing key

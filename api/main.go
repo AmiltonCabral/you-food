@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/amiltoncabral/youFood/database"
 	"github.com/amiltoncabral/youFood/redis"
@@ -17,6 +18,7 @@ func main() {
 	rd := redis.OpenConn()
 	defer redis.CloseConn(rd)
 
+	time.Sleep(5 * time.Second)
 	rmq_conn, err := amqp.Dial(os.Getenv("RMQ_URL"))
 	if err != nil {
 		fmt.Println(err)
