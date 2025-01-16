@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/amiltoncabral/youFood/redis"
 	"github.com/amiltoncabral/youFood/routes"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.opentelemetry.io/otel"
 )
 
 func main() {
@@ -34,6 +37,24 @@ func main() {
 		fmt.Printf("Connected to RabbitMQ\n")
 	}
 	defer rmq_conn.Close()
+
+	res, err := newResource()
+	if err != nil {
+		panic(err)
+	}
+
+	meterProvider, err := newMeterProvider(res)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err := meterProvider.Shutdown(context.Background()); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	otel.SetMeterProvider(meterProvider)
 
 	routes.HandleRequest(db, rd, rmq_conn)
 }

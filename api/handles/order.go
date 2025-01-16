@@ -73,6 +73,8 @@ func (h Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	h.sendOrderMessage(order)
 
+	h.instrument.orderCounter.Add(r.Context(), 1)
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(order)
